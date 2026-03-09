@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Admin Enrollment System</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+
+body{
+font-family:Arial;
+background:#f4f6f9;
+margin:0;
+}
+
+header{
+background:#8b4513;
+color:white;
+padding:15px;
+text-align:center;
+font-size:22px;
+}
+
+.container{
+width:90%;
+margin:auto;
+margin-top:20px;
+}
+
+.card{
+background:white;
+padding:20px;
+border-radius:8px;
+box-shadow:0 0 10px rgba(0,0,0,0.1);
+margin-bottom:20px;
+}
+
+input,select,button{
+padding:8px;
+margin:5px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+}
+
+th,td{
+border:1px solid #ccc;
+padding:8px;
+text-align:center;
+}
+
+button{
+background:#FF914D;
+color:white;
+border:none;
+cursor:pointer;
+}
+
+.delete{
+background:red;
+}
+
+.hidden{
+display:none;
+}
+
+.eye{
+cursor:pointer;
+margin-left:-25px;
+}
+
+</style>
+</head>
+
+<body>
+
+<header>Admin Enrollment Panel</header>
+
+<div class="container">
+
+<!-- LOGIN PAGE -->
+
+<div id="loginPage" class="card">
+
+<h2>Admin Login</h2>
+
+<input type="email" id="loginEmail" placeholder="Email">
+
+<br>
+
+<input type="password" id="loginPassword" placeholder="Password">
+<i class="fa fa-eye eye" onclick="togglePassword('loginPassword')"></i>
+
+<br><br>
+
+<button onclick="login()">Login</button>
+
+<hr>
+
+<h3>Create Admin Account</h3>
+
+<input type="email" id="signupEmail" placeholder="Valid Email">
+<input type="password" id="signupPassword" placeholder="Password">
+
+<button onclick="signup()">Create Account</button>
+
+</div>
+
+
+<!-- ADMIN PANEL -->
+
+<div id="adminPanel" class="hidden">
+
+<div class="card">
+
+<h2>Add New Subject</h2>
+
+<input id="code" placeholder="Subject Code">
+<input id="name" placeholder="Subject Name">
+<input id="room" placeholder="Room">
+<input id="time" placeholder="Time">
+<input id="email" placeholder="Student Email">
+
+<button onclick="addSubject()">Add Subject</button>
+
+</div>
+
+<div class="card">
+
+<h2>Enroll Student</h2>
+
+<select id="scode"></select>
+<select id="sname"></select>
+<select id="sroom"></select>
+<select id="stime"></select>
+<select id="semail"></select>
+
+<button onclick="enroll()">Add This Subject</button>
+<button class="delete" onclick="deleteSubject()">Delete Subject From Dropdown</button>
+
+</div>
+
+
+<div class="card">
+
+<h2>Enrollment Records</h2>
+
+<table>
+
+<tr>
+<th>Subject Code</th>
+<th>Subject Name</th>
+<th>Room</th>
+<th>Time</th>
+<th>Email</th>
+<th>Action</th>
+</tr>
+
+<tbody id="table"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+function togglePassword(id){
+
+let p=document.getElementById(id);
+
+p.type=p.type==="password"?"text":"password";
+
+}
+
+function validEmail(email){
+
+return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+}
+
+
+/* SESSION CHECK */
+
+window.onload=function(){
+
+if(sessionStorage.getItem("adminLogin")=="true"){
+
+document.getElementById("loginPage").style.display="none";
+document.getElementById("adminPanel").classList.remove("hidden");
+
+loadDropdowns();
+loadTable();
+
+}
+
+}
+
+
+/* SIGNUP */
+
+function signup(){
+
+let email=document.getElementById("signupEmail").value;
+let pass=document.getElementById("signupPassword").value;
+
+if(!validEmail(email)){
+
+alert("Enter valid email");
+return;
+
+}
+
+let users=JSON.parse(localStorage.getItem("adminUsers"))||[];
+
+users.push({email,pass});
+
+localStorage.setItem("adminUsers",JSON.stringify(users));
+
+alert("Admin account created");
+
+}
+
+
+/* LOGIN */
+
+function login(){
+
+let email=document.getElementById("loginEmail").value;
+let pass=document.getElementById("loginPassword").value;
+
+let users=JSON.parse(localStorage.getItem("adminUsers"))||[];
+
+let user=users.find(u=>u.email===email && u.pass===pass);
+
+if(!user){
+
+alert("Invalid login");
+return;
+
+}
+
+sessionStorage.setItem("adminLogin","true");
+
+document.getElementById("loginPage").style.display="none";
+document.getElementById("adminPanel").classList.remove("hidden");
+
+loadDropdowns();
+loadTable();
+
+}
+
+
+/* ADD SUBJECT */
+
+function addSubject(){
+
+let code=document.getElementById("code").value;
+let name=document.getElementById("name").value;
+let room=document.getElementById("room").value;
+let time=document.getElementById("time").value;
+let email=document.getElementById("email").value;
+
+if(!validEmail(email)){
+alert("Student email invalid");
+return;
+}
+
+let subjects=JSON.parse(localStorage.getItem("subjects"))||[];
+
+subjects.push({code,name,room,time,email});
+
+localStorage.setItem("subjects",JSON.stringify(subjects));
+
+loadDropdowns();
+
+alert("Subject Added");
+
+}
+
+
+/* LOAD DROPDOWNS */
+
+function loadDropdowns(){
+
+let subjects=JSON.parse(localStorage.getItem("subjects"))||[];
+
+let scode=document.getElementById("scode");
+let sname=document.getElementById("sname");
+let sroom=document.getElementById("sroom");
+let stime=document.getElementById("stime");
+let semail=document.getElementById("semail");
+
+scode.innerHTML="";
+sname.innerHTML="";
+sroom.innerHTML="";
+stime.innerHTML="";
+semail.innerHTML="";
+
+subjects.forEach(s=>{
+
+scode.innerHTML+=`<option>${s.code}</option>`;
+sname.innerHTML+=`<option>${s.name}</option>`;
+sroom.innerHTML+=`<option>${s.room}</option>`;
+stime.innerHTML+=`<option>${s.time}</option>`;
+semail.innerHTML+=`<option>${s.email}</option>`;
+
+});
+
+}
+
+
+/* DELETE SUBJECT FROM DROPDOWN */
+
+function deleteSubject(){
+
+let selected=document.getElementById("scode").value;
+
+let subjects=JSON.parse(localStorage.getItem("subjects"))||[];
+
+subjects=subjects.filter(s=>s.code!==selected);
+
+localStorage.setItem("subjects",JSON.stringify(subjects));
+
+loadDropdowns();
+
+alert("Subject deleted");
+
+}
+
+
+/* ENROLL */
+
+function enroll(){
+
+let code=document.getElementById("scode").value;
+let name=document.getElementById("sname").value;
+let room=document.getElementById("sroom").value;
+let time=document.getElementById("stime").value;
+let email=document.getElementById("semail").value;
+
+let enrollments=JSON.parse(localStorage.getItem("enrollments"))||[];
+
+enrollments.push({code,name,room,time,email});
+
+localStorage.setItem("enrollments",JSON.stringify(enrollments));
+
+loadTable();
+
+}
+
+
+/* TABLE */
+
+function loadTable(){
+
+let enrollments=JSON.parse(localStorage.getItem("enrollments"))||[];
+
+let table=document.getElementById("table");
+
+table.innerHTML="";
+
+enrollments.forEach((e,index)=>{
+
+table.innerHTML+=`
+
+<tr>
+<td>${e.code}</td>
+<td>${e.name}</td>
+<td>${e.room}</td>
+<td>${e.time}</td>
+<td>${e.email}</td>
+<td><button class="delete" onclick="remove(${index})">Delete</button></td>
+</tr>
+
+`;
+
+});
+
+}
+
+
+/* REMOVE ENROLLMENT */
+
+function remove(index){
+
+let enrollments=JSON.parse(localStorage.getItem("enrollments"))||[];
+
+enrollments.splice(index,1);
+
+localStorage.setItem("enrollments",JSON.stringify(enrollments));
+
+loadTable();
+
+}
+
+</script>
+
+</body>
+</html>

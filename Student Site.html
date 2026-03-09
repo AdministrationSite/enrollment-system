@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Student Enrollment System</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+
+body{
+font-family:Arial;
+background:#f4f6f9;
+margin:0;
+}
+
+header{
+background:#8b4513;
+color:white;
+padding:15px;
+text-align:center;
+font-size:22px;
+}
+
+.container{
+width:90%;
+margin:auto;
+margin-top:20px;
+}
+
+.card{
+background:white;
+padding:20px;
+border-radius:8px;
+box-shadow:0 0 10px rgba(0,0,0,0.1);
+}
+
+input,button{
+padding:8px;
+margin:5px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+}
+
+th,td{
+border:1px solid #ccc;
+padding:8px;
+text-align:center;
+}
+
+button{
+background:#FF914D;
+color:white;
+border:none;
+}
+
+.hidden{
+display:none;
+}
+
+.eye{
+cursor:pointer;
+margin-left:-25px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header>Student Enrollment System</header>
+
+<div class="container">
+
+<div id="loginPage" class="card">
+
+<h2>Student Login</h2>
+
+<input type="email" id="loginEmail" placeholder="Email">
+
+<br>
+
+<input type="password" id="loginPassword" placeholder="Password">
+<i class="fa fa-eye eye" onclick="togglePassword('loginPassword')"></i>
+
+<br><br>
+
+<button onclick="login()">Login</button>
+
+<hr>
+
+<h3>Create Student Account</h3>
+
+<input type="email" id="signupEmail" placeholder="Valid Email">
+<input type="password" id="signupPassword" placeholder="Password">
+
+<button onclick="signup()">Create Account</button>
+
+</div>
+
+
+<div id="studentView" class="card hidden">
+
+<h2>Your Enrolled Subjects</h2>
+
+<table>
+
+<tr>
+<th>Subject Code</th>
+<th>Subject Name</th>
+<th>Room</th>
+<th>Time</th>
+<th>Email</th>
+</tr>
+
+<tbody id="table"></tbody>
+
+</table>
+
+<br>
+
+<button onclick="window.print()">Print Registration Card</button>
+
+</div>
+
+</div>
+
+<script>
+
+function togglePassword(id){
+
+let p=document.getElementById(id);
+
+p.type=p.type==="password"?"text":"password";
+
+}
+
+function validEmail(email){
+
+return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+}
+
+
+/* SESSION CHECK */
+
+window.onload=function(){
+
+if(sessionStorage.getItem("studentLogin")=="true"){
+
+document.getElementById("loginPage").style.display="none";
+document.getElementById("studentView").classList.remove("hidden");
+
+loadStudent();
+
+}
+
+}
+
+
+/* SIGNUP */
+
+function signup(){
+
+let email=document.getElementById("signupEmail").value;
+let pass=document.getElementById("signupPassword").value;
+
+if(!validEmail(email)){
+
+alert("Enter valid email");
+return;
+
+}
+
+let users=JSON.parse(localStorage.getItem("studentUsers"))||[];
+
+users.push({email,pass});
+
+localStorage.setItem("studentUsers",JSON.stringify(users));
+
+alert("Student account created");
+
+}
+
+
+/* LOGIN */
+
+function login(){
+
+let email=document.getElementById("loginEmail").value;
+let pass=document.getElementById("loginPassword").value;
+
+let users=JSON.parse(localStorage.getItem("studentUsers"))||[];
+
+let user=users.find(u=>u.email===email && u.pass===pass);
+
+if(!user){
+
+alert("Invalid login");
+return;
+
+}
+
+sessionStorage.setItem("studentLogin","true");
+sessionStorage.setItem("studentEmail",email); // SAVE EMAIL
+
+document.getElementById("loginPage").style.display="none";
+document.getElementById("studentView").classList.remove("hidden");
+
+loadStudent();
+
+}
+
+
+/* LOAD STUDENT SUBJECTS */
+
+function loadStudent(){
+
+let email=sessionStorage.getItem("studentEmail"); // GET STORED EMAIL
+
+let enrollments=JSON.parse(localStorage.getItem("enrollments"))||[];
+
+let table=document.getElementById("table");
+
+table.innerHTML="";
+
+let filtered=enrollments.filter(e=>e.email===email);
+
+if(filtered.length===0){
+
+table.innerHTML="<tr><td colspan='5'>No Data</td></tr>";
+return;
+
+}
+
+filtered.forEach(e=>{
+
+table.innerHTML+=`
+
+<tr>
+<td>${e.code}</td>
+<td>${e.name}</td>
+<td>${e.room}</td>
+<td>${e.time}</td>
+<td>${e.email}</td>
+</tr>
+
+`;
+
+});
+
+}
+
+</script>
+
+</body>
+</html>
