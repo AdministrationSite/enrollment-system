@@ -169,6 +169,13 @@ margin-left:-25px;
 
 <script>
 
+var password = prompt("Enter Admin Password");
+
+if(password !== "admin123"){
+alert("Access Denied");
+window.location="student.html";
+}
+
 function togglePassword(id){
 
 let p=document.getElementById(id);
@@ -401,4 +408,5 @@ loadTable();
 </script>
 
 </body>
+
 </html>
