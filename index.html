@@ -120,6 +120,8 @@ margin-left:-25px;
 <input id="name" placeholder="Subject Name">
 <input id="room" placeholder="Room">
 <input id="time" placeholder="Time">
+<input id="week" placeholder="Week">
+<input id="year" placeholder="Year">
 <input id="email" placeholder="Student Email">
 
 <button onclick="addSubject()">Add Subject</button>
@@ -134,6 +136,8 @@ margin-left:-25px;
 <select id="sname"></select>
 <select id="sroom"></select>
 <select id="stime"></select>
+<select id="sweek"></select>
+<select id="syear"></select>
 <select id="semail"></select>
 
 <button onclick="enroll()">Add This Subject</button>
@@ -153,6 +157,8 @@ margin-left:-25px;
 <th>Subject Name</th>
 <th>Room</th>
 <th>Time</th>
+<th>Week</th>
+<th>Year</th>
 <th>Email</th>
 <th>Action</th>
 </tr>
@@ -169,12 +175,12 @@ margin-left:-25px;
 
 <script>
 
-var password = prompt("Enter Admin Password");
+/*var password = prompt("Enter Admin Password");
 
 if(password !== "Admin20!26C"){
 alert("Access Denied");
 window.location="index.html";
-}
+}*/
 
 function togglePassword(id){
 
@@ -186,7 +192,9 @@ p.type=p.type==="password"?"text":"password";
 
 function validEmail(email){
 
-return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+let pattern=/^[^\s@]+@(gmail\.com)$/;
+
+return pattern.test(email);
 
 }
 
@@ -270,6 +278,8 @@ let code=document.getElementById("code").value;
 let name=document.getElementById("name").value;
 let room=document.getElementById("room").value;
 let time=document.getElementById("time").value;
+let week=document.getElementById("week").value;
+let year=document.getElementById("year").value;
 let email=document.getElementById("email").value;
 
 if(!validEmail(email)){
@@ -279,7 +289,7 @@ return;
 
 let subjects=JSON.parse(localStorage.getItem("subjects"))||[];
 
-subjects.push({code,name,room,time,email});
+subjects.push({code,name,room,time,week,year,email});
 
 localStorage.setItem("subjects",JSON.stringify(subjects));
 
@@ -301,12 +311,16 @@ let sname=document.getElementById("sname");
 let sroom=document.getElementById("sroom");
 let stime=document.getElementById("stime");
 let semail=document.getElementById("semail");
+let sweek=document.getElementById("sweek");
+let syear=document.getElementById("syear");
 
 scode.innerHTML="";
 sname.innerHTML="";
 sroom.innerHTML="";
 stime.innerHTML="";
 semail.innerHTML="";
+sweek.innerHTML="";
+syear.innerHTML="";
 
 subjects.forEach(s=>{
 
@@ -315,6 +329,8 @@ sname.innerHTML+=`<option>${s.name}</option>`;
 sroom.innerHTML+=`<option>${s.room}</option>`;
 stime.innerHTML+=`<option>${s.time}</option>`;
 semail.innerHTML+=`<option>${s.email}</option>`;
+sweek.innerHTML+=`<option>${s.week}</option>`;
+syear.innerHTML+=`<option>${s.year}</option>`;
 
 });
 
@@ -325,11 +341,15 @@ semail.innerHTML+=`<option>${s.email}</option>`;
 
 function deleteSubject(){
 
-let selected=document.getElementById("scode").value;
+let selectedCode=document.getElementById("scode").value;
 
 let subjects=JSON.parse(localStorage.getItem("subjects"))||[];
 
-subjects=subjects.filter(s=>s.code!==selected);
+let index=subjects.findIndex(s=>s.code===selectedCode);
+
+if(index>-1){
+subjects.splice(index,1);
+}
 
 localStorage.setItem("subjects",JSON.stringify(subjects));
 
@@ -348,11 +368,12 @@ let code=document.getElementById("scode").value;
 let name=document.getElementById("sname").value;
 let room=document.getElementById("sroom").value;
 let time=document.getElementById("stime").value;
+let week=document.getElementById("sweek").value;
+let year=document.getElementById("syear").value;
 let email=document.getElementById("semail").value;
-
 let enrollments=JSON.parse(localStorage.getItem("enrollments"))||[];
 
-enrollments.push({code,name,room,time,email});
+enrollments.push({code,name,room,time,week,year,email});
 
 localStorage.setItem("enrollments",JSON.stringify(enrollments));
 
@@ -380,8 +401,14 @@ table.innerHTML+=`
 <td>${e.name}</td>
 <td>${e.room}</td>
 <td>${e.time}</td>
+<td>${e.week}</td>
+<td>${e.year}</td>
 <td>${e.email}</td>
-<td><button class="delete" onclick="remove(${index})">Delete</button></td>
+
+<td>
+<button onclick="sendEmail(${index})">Send</button>
+<button class="delete" onclick="remove(${index})">Delete</button>
+</td>
 </tr>
 
 `;
@@ -393,9 +420,33 @@ table.innerHTML+=`
 
 /* REMOVE ENROLLMENT */
 
-function remove(index){
+function sendEmail(index){
 
 let enrollments=JSON.parse(localStorage.getItem("enrollments"))||[];
+
+let e=enrollments[index];
+
+let subject="Enrollment Details";
+
+let body=
+"Subject Code: "+e.code+
+"%0D%0ASubject Name: "+e.name+
+"%0D%0ARoom: "+e.room+
+"%0D%0ATime: "+e.time+
+"%0D%0AWeek: "+e.week+
+"%0D%0AYear: "+e.year+
+"%0D%0AStudent Email: "+e.email;
+
+window.location.href=
+"mailto:"+e.email+
+"?subject="+subject+
+"&body="+body;
+
+}
+
+function remove(index){
+
+let enrollments = JSON.parse(localStorage.getItem("enrollments")) || [];
 
 enrollments.splice(index,1);
 
@@ -410,4 +461,3 @@ loadTable();
 </body>
 
 </html>
-
