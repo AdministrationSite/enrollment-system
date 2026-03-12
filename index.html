@@ -478,10 +478,12 @@ let body=
 "%0D%0AYear: "+e.year+
 "%0D%0AStudent Email: "+e.email;
 
-window.location.href=
-"mailto:"+e.email+
-"?subject="+subject+
-"&body="+body;
+window.open(
+"https://mail.google.com/mail/?view=cm&fs=1&to="+e.email+
+"&su="+subject+
+"&body="+body,
+"_blank"
+);
 
 }
 
