@@ -78,6 +78,11 @@ margin-left:-25px;
 
 <header>Admin Enrollment Panel</header>
 
+ <div style="float:right; text-align:right;">
+    <div id="liveTime" style="font-size:14px;"></div>
+    <div id="adminEmailDisplay" style="font-size:14px; margin-top:2px;"></div>
+  </div>
+
 <div class="container">
 
 <!-- LOGIN PAGE -->
@@ -143,7 +148,7 @@ margin-left:-25px;
 
 <button onclick="enroll()">Add This Subject</button>
 <button class="delete" onclick="deleteSubject()">Delete Subject From Dropdown</button>
-
+<button class="delete" onclick="resetAllData()">Reset All Data</button>
 </div>
 
 
@@ -210,6 +215,33 @@ return pattern.test(email);
 }
 
 /* SESSION CHECK */
+
+function updateTime(){
+    const now = new Date();
+
+    const hours = now.getHours() % 12 || 12;
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    const milliseconds = String(now.getMilliseconds()).padStart(3, '0');
+
+    const weekday = now.toLocaleDateString('en-US', { weekday: 'long' });
+    const month = now.toLocaleDateString('en-US', { month: 'long' });
+    const day = now.getDate();
+    const year = now.getFullYear();
+
+    const timeString = `${hours}:${minutes}:${seconds}:${milliseconds} | ${weekday}, ${month} ${day}, ${year}`;
+
+    document.getElementById("liveTime").innerText = timeString;
+
+    // Show logged-in admin email
+    const email = localStorage.getItem("adminEmail");
+    if(email){
+        document.getElementById("adminEmailDisplay").innerText = `Hello! ${email}`;
+    }
+}
+
+// Update every 100ms
+setInterval(updateTime, 100);
 
 window.onload=function(){
 
@@ -324,12 +356,989 @@ alert("Subject Added");
 }
 
 
-/* LOAD DROPDOWNS */
+/* FIXED DEFAULT SUBJECT DATA */
+const fixedSubjects = [
+
+{code:" Dropdown Menu for Subject Code ", 
+name:"  Dropdown Menu for Subject Name ", 
+room:"  Dropdown Menu for Room ", 
+time:"  Dropdown Menu for Time ", 
+week:"  Dropdown Menu for Week ", 
+year:"  Dropdown Menu for Year ", 
+email:" Dropdown Menu Student Email "},
+
+{code:"WKDIS-AERE-2000-1", 
+name:"Appropriate Response", 
+room:"IN.9", 
+time:"7:00-8:00 AM", 
+week:"Monday", 
+year:"2420", 
+email:"keyadminstudent1.syrmin6@gmail.com"},
+
+{code:"WDSC-ACRI1", 
+name:"Art Criticism I", 
+room:"IN.10A", 
+time:"7:30-8:30 AM", 
+week:"Tuesday", 
+year:"2520", 
+email:"keyadminstudent2.syrmin6@gmail.com"},
+
+{code:"WDSC-ACRI2", 
+name:"Art Criticism II", 
+room:"IN.10B", 
+time:"8:00-9:00 AM", 
+week:"Wednesday", 
+year:"2620", 
+email:""},
+
+{code:"WDSC-ACRI3", 
+name:"Art Criticism III", 
+room:"Online", 
+time:"8:30-9:30 AM", 
+week:"Thursday", 
+year:"2720", 
+email:""},
+
+{code:"WDSC-BCEH1", 
+name:"Basic English I", 
+room:"", 
+time:"9:00-10:00 AM", 
+week:"Friday", 
+year:"2820", 
+email:""},
+
+{code:"WDSC-BCEH2", 
+name:"Basic English II", 
+room:"", 
+time:"9:30-10:30 AM", 
+week:"Saturday", 
+year:"2920", 
+email:""},
+
+{code:"WDSC-BKBG1", 
+name:"Basic Knowledge of Banking I", 
+room:"", 
+time:"10:00-11:00 AM", 
+week:"Sunday", 
+year:"3020", 
+email:""},
+
+{code:"WDSC-BKBG2", 
+name:"Basic Knowledge of Banking II", 
+room:"", 
+time:"10:30-11:30 AM", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-BMAT1", 
+name:"Basic Mathematics I", 
+room:"", 
+time:"11:00-12:00 PM", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-BMAT2", 
+name:"Basic Mathematics II", 
+room:"", 
+time:"11:30-12:00 PM", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-BMAT3", 
+name:"Basic Mathematics III", 
+room:"", 
+time:"12:00-1:00 PM", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-BMAT4", 
+name:"Basic Mathematics IV", 
+room:"", 
+time:"12:30-1:30 PM", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-BMAT5", 
+name:"Basic Mathematics V", 
+room:"", 
+time:"1:00-2:00 PM", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-CGEE", 
+name:"Cooking Enterprise", 
+room:"", 
+time:"1:30-2:30 PM", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-CREN1", 
+name:"Critical English I", 
+room:"", 
+time:"2:00-3:00 PM", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-CREN2", 
+name:"Critical English II", 
+room:"", 
+time:"2:30-3:30 PM", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-CWRI1", 
+name:"Critical Writing I", 
+room:"", 
+time:"3:00-4:00 PM", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-CWRI2", 
+name:"Critical Writing II", 
+room:"", 
+time:"3:30-4:30 PM", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-CPHI", 
+name:"Cultural of Philosophical Society", 
+room:"", 
+time:"4:00-5:00 PM", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-EGEO1", 
+name:"Earth Geology I", 
+room:"", 
+time:"4:30-5:30 PM", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-EGEO2", 
+name:"Earth Geology II", 
+room:"", 
+time:"5:00-6:00 PM", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-EGEO3", 
+name:"Earth Geology III", 
+room:"", 
+time:"5:30-6:30 PM", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-EGEO4", 
+name:"Earth Geology IV", 
+room:"", 
+time:"6:00-7:00 PM", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-EGEO5", 
+name:"Earth Geology V", 
+room:"", 
+time:"6:30-7:30 PM", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-ECOG", 
+name:"Ecological Globalization", 
+room:"", 
+time:"7:00-8:00 PM", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-ECSS", 
+name:"Economic Sanctions", 
+room:"", 
+time:"7:30-8:30 PM", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-ETBC1", 
+name:"Enhancing Technology Based-Course I", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-ETBC2", 
+name:"Enhancing Technology Based-Course II", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-ELAG1", 
+name:"Estancia La Guitarra I", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-ELAG2", 
+name:"Estancia La Guitarra II", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC/WDCC-GENA-2000-1", 
+name:"General Announcements", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-GCHM1", 
+name:"General Chemistry I", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-GCHM2", 
+name:"General Chemistry II", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-GMTH1", 
+name:"General Mathematics I", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-GMTH2", 
+name:"General Mathematics II", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-GPYS1", 
+name:"General Physics I", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-GPYS2", 
+name:"General Physics II", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-HDCC1", 
+name:"Hazard and Disaster Climate Change I", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-HDCC2", 
+name:"Hazard and Disaster Climate Change II", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-HDCC3", 
+name:"Hazard and Disaster Climate Change III", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-HDCC4", 
+name:"Hazard and Disaster Climate Change IV", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-HHSM", 
+name:"Health Hazard of System", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WKDIS-IELTS-2000-1", 
+name:"IELTSS Session", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-IANC", 
+name:"Introduction to Animal Care", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-IANK", 
+name:"Introduction to Animal Kingdom", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-IENP", 
+name:"Introduction to Entrepreneurship", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-INGM", 
+name:"Introduction to Greek Mythology", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-INHB", 
+name:"Introduction to Hardware Business", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-INMH", 
+name:"Introduction to Mental Health", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-IPPS", 
+name:"Introduction to Philosophy Peoples", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-ITRO", 
+name:"Introduction to Roman Empire", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-INTO", 
+name:"Introduction to Tourism", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-KPIS", 
+name:"Kontemporaryong Isyu", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-LHCL", 
+name:"Learning Hangul Course Language", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-LJLA", 
+name:"Learning Japanese Language", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WKDIS-LMAW-2000-1", 
+name:"Learning Modality in the Aspect World", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-LSEC", 
+name:"Learning Spanish/Espanyol Course Language", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-LHAS", 
+name:"Life History of the American Society", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-LHKS", 
+name:"Life History of the Korean War Society", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-LHPS", 
+name:"Life History of the Philippine Society", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WKDIS-LLLS-2000-1", 
+name:"Lifelong Learning Skills", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WKDIS-LABM", 
+name:"Line Argument for Basic Mathematics", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WKDIS-MHEA-2000-1", 
+name:"Mental Health Awareness and Stress Management", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-MUSO", 
+name:"Music as One", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-MUSA", 
+name:"Music on Action", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-NNPC", 
+name:"Nature of Nurses and Doctors", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDCC-OAPA1", 
+name:"Ortografia Practica I", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDCC-OAPA2", 
+name:"Ortografia Practica I", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-OAPA3", 
+name:"Ortografia Practica III", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-PAGP", 
+name:"Pagbasa ng Pagasa", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-PBPO", 
+name:"Pagsasanay sa Baybaying Pilipino", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDCC-PABT1", 
+name:"Pag-unawa sa Binasang Teksto I", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDCC-PABT2", 
+name:"Pag-unawa sa Binasang Teksto II", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-PABT3", 
+name:"Pag-unawa sa Binasang Teksto III", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDCC-PABT4", 
+name:"Pag-unawa sa Binasang Teksto IV", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDCC-PABT5", 
+name:"Pag-unawa sa Binasang Teksto V", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-PGOV1", 
+name:"Philippine Government and Agencies I", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-PGOV2", 
+name:"Philippine Government and Agencies II", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-PGOV3", 
+name:"Philippine Government and Agencies III", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-PLEN1", 
+name:"Physical Education I", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-PLEN2", 
+name:"Physical Education II", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-PLEN3", 
+name:"Physical Education III", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-PLEN4", 
+name:"Physical Education IV", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-PRAG1", 
+name:"Practical Reading I", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-PRAG2", 
+name:"Practical Reading II", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-PRAG3", 
+name:"Practical Reading III", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-PRAG4", 
+name:"Practical Reading IV", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-PRAG5", 
+name:"Practical Reading V", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-PRSH1", 
+name:"Practical Research I", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-PRSH2", 
+name:"Practical Research II", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-PSEG1", 
+name:"Practical Spelling I", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-PSEG2", 
+name:"Practical Spelling II", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-PSEG3", 
+name:"Practical Spelling III", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-PSEG4", 
+name:"Practical Spelling IV", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-PSEG5", 
+name:"Practical Spelling V", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-PLWG1", 
+name:"Practical Writing Lessons I", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-PLWG2", 
+name:"Practical Writing Lessons II", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-PLWG3", 
+name:"Practical Writing Lessons III", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-PLWG4", 
+name:"Practical Writing Lessons IV", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-PLWG5", 
+name:"Practical Writing Lessons V", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-SPOE", 
+name:"Sonetto Poesia", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-STAT1", 
+name:"Statistics and Probability I", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-STAT2", 
+name:"Statistics and Probability II", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WKDIS-TLJS-2000-1", 
+name:"The Life of Jesus", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-UHSU", 
+name:"Understanding History of Soviet Union", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDCC-UGMS1", 
+name:"Understanding Mathematics I", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDCC-UGMS2", 
+name:"Understanding Mathematics II", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDCC-UGMS3", 
+name:"Understanding Mathematics III", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-UNQU", 
+name:"Understanding Quotations", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-UNWW", 
+name:"Understanding the History of World Wars 1 and 2", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-UCTS1", 
+name:"Using Computer Technologies I", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-UCTS2", 
+name:"Using Computer Technologies II", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-UCTS3", 
+name:"Using Computer Technologies III", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-UCTS4", 
+name:"Using Computer Technologies IV", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-VELS", 
+name:"Virtues Lists", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+{code:"WDSC-WOLI", 
+name:"World Literature", 
+room:"", 
+time:"", 
+week:"", 
+year:"", 
+email:""},
+
+];
 
 function loadDropdowns(){
 
-let subjects=JSON.parse(localStorage.getItem("subjects"))||[];
+let storedSubjects = JSON.parse(localStorage.getItem("subjects")) || [];
 
+/* MERGE FIXED + ADDED SUBJECTS */
+let subjects = [...fixedSubjects, ...storedSubjects];
+
+/* REMOVE DUPLICATES (optional safety) */
+let unique = [];
+let seen = new Set();
+
+subjects.forEach(s=>{
+
+/* REMOVE EMPTY ENTRIES */
+if(
+s.code.trim() === "" &&
+s.name.trim() === "" &&
+s.room.trim() === "" &&
+s.time.trim() === "" &&
+s.week.trim() === "" &&
+s.year.trim() === "" &&
+s.email.trim() === ""
+){
+return; // skip blank rows
+}
+
+let key = s.code + s.name + s.email;
+
+if(!seen.has(key)){
+seen.add(key);
+unique.push(s);
+}
+
+});
+
+/* SORT ONLY SELECTED FIELDS */
+let sortedCode = [...unique].sort((a,b)=>a.code.localeCompare(b.code));
+let sortedName = [...unique].sort((a,b)=>a.name.localeCompare(b.name));
+let sortedYear = [...unique].sort((a,b)=>a.year.localeCompare(b.year));
+let sortedEmail = [...unique].sort((a,b)=>a.email.localeCompare(b.email));
+
+/* GET ELEMENTS */
 let scode=document.getElementById("scode");
 let sname=document.getElementById("sname");
 let sroom=document.getElementById("sroom");
@@ -338,6 +1347,7 @@ let semail=document.getElementById("semail");
 let sweek=document.getElementById("sweek");
 let syear=document.getElementById("syear");
 
+/* CLEAR */
 scode.innerHTML="";
 sname.innerHTML="";
 sroom.innerHTML="";
@@ -346,16 +1356,54 @@ semail.innerHTML="";
 sweek.innerHTML="";
 syear.innerHTML="";
 
-subjects.forEach(s=>{
+/* APPLY SORTED DROPDOWNS */
+/* LIMIT FUNCTION */
+function limit(arr, max){
+return arr.slice(0, max);
+}
 
-scode.innerHTML+=`<option>${s.code}</option>`;
-sname.innerHTML+=`<option>${s.name}</option>`;
-sroom.innerHTML+=`<option>${s.room}</option>`;
-stime.innerHTML+=`<option>${s.time}</option>`;
-semail.innerHTML+=`<option>${s.email}</option>`;
-sweek.innerHTML+=`<option>${s.week}</option>`;
-syear.innerHTML+=`<option>${s.year}</option>`;
+/* APPLY SORTED DROPDOWNS WITH LIMITS */
 
+limit(sortedCode,118).forEach(s=>{
+if(s.code) scode.innerHTML += `<option>${s.code}</option>`;
+});
+
+limit(sortedName,118).forEach(s=>{
+if(s.name) sname.innerHTML += `<option>${s.name}</option>`;
+});
+
+limit(sortedYear,10).forEach(s=>{
+if(s.year) syear.innerHTML += `<option>${s.year}</option>`;
+});
+
+limit(sortedEmail,100).forEach(s=>{
+if(s.email) semail.innerHTML += `<option>${s.year}</option>`;
+});
+
+/* NON-SORTED (ORIGINAL ORDER) */
+/* NON-SORTED (NO DUPLICATES, NO REPEAT) */
+
+/* GET UNIQUE VALUES ONCE */
+let rooms = [...new Set(unique.map(s => s.room).filter(v=>v))];
+let times = [...new Set(unique.map(s => s.time).filter(v=>v))];
+let weeks = [...new Set(unique.map(s => s.week).filter(v=>v))];
+let years = [...new Set(unique.map(s=>s.year).filter(v=>v))];
+let emails = [...new Set(unique.map(s=>s.email).filter(v=>v))];
+
+years.forEach(y=> syear.innerHTML += `<option>${y}</option>`);
+emails.forEach(e=> semail.innerHTML += `<option>${e}</option>`);
+
+/* APPLY LIMITS */
+rooms.slice(0,6).forEach(r=>{
+sroom.innerHTML += `<option>${r}</option>`;
+});
+
+times.slice(0,28).forEach(t=>{
+stime.innerHTML += `<option>${t}</option>`;
+});
+
+weeks.slice(0,7).forEach(w=>{
+sweek.innerHTML += `<option>${w}</option>`;
 });
 
 }
@@ -503,6 +1551,37 @@ localStorage.setItem("enrollments",JSON.stringify(enrollments));
 loadTable();
 
 }
+
+function resetAllData(){
+
+if(confirm("Are you sure you want to delete ALL data? This cannot be undone. ")){
+
+/* CLEAR STORAGE */
+localStorage.removeItem("subjects");
+localStorage.removeItem("enrollments");
+
+/* OPTIONAL: also clear admin accounts (uncomment if needed) */
+// localStorage.removeItem("adminUsers");
+
+/* RESET DROPDOWNS + TABLE */
+loadDropdowns();
+loadTable();
+
+/* CLEAR INPUT FIELDS */
+document.getElementById("code").value="";
+document.getElementById("name").value="";
+document.getElementById("room").value="";
+document.getElementById("time").value="";
+document.getElementById("week").value="";
+document.getElementById("year").value="";
+document.getElementById("email").value="";
+
+alert("All data has been reset!");
+
+}
+
+}
+
 
 </script>
 
